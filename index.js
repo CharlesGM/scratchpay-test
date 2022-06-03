@@ -1,12 +1,13 @@
 // Bring in the express server and create application
 let express = require('express');
+let busboy = require('connect-busboy'); //middleware for form/file upload
 let app = express();
 let scratchRepo = require('./repos/scratchRepo');
 // Use the express Router object
 let router = express.Router();
 
 app.use(express.json());
-
+app.use(busboy());
 
 // Create GET to return a list of all scratchs
 router.get('/', function (req, res, next) {
@@ -81,6 +82,39 @@ router.post('/', function (req, res, next) {
     next(err);
   });
 })
+
+app.route('/upload')
+    .post(function (req, res, next) {
+
+        var fstream;
+        req.pipe(req.busboy);
+        req.busboy.on('file', function (fieldname, file, filename) {
+            console.log("Uploading: " + filename);
+
+            const CSVToJSON = require('csvtojson');
+            // convert users.csv file to JSON array
+            CSVToJSON().fromFile(file)
+                .then(users => {
+                  fs.writeFile('data.json', users, 'utf8', callback)
+                    // users is a JSON array
+                    // log the JSON array
+                    console.log(users);
+                }).catch(err => {
+                    // log error if any
+                    console.log(err);
+                });
+
+
+            //Path where image will be uploaded
+            //fstream = fs.createWriteStream(__dirname + '/img/' + filename);
+            //file.pipe(fstream);
+            //fstream.on('close', function () {    
+              //  console.log("Upload Finished of " + filename);              
+                //res.redirect('back');           //where to go next
+            });
+        });
+    //});
+
 // Configure router so all routes are prefixed with /users/v1
 app.use('/users/', router);
 
@@ -88,3 +122,4 @@ app.use('/users/', router);
 var server = app.listen(11000, function () {
   console.log('Node server is running on http://localhost:11000..');
 });
+
