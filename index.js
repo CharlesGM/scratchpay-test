@@ -81,7 +81,7 @@ router.post('/', function (req, res, next) {
     next(err);
   });
 })
-// Configure router so all routes are prefixed with /api/v1
+// Configure router so all routes are prefixed with /users/v1
 app.use('/users/', router);
 
 // Create server to listen on port 11000
