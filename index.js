@@ -72,21 +72,6 @@ router.get('/:id', function (req, res, next) {
   });
 });
 
-/*
-//router.post('/users', function (req, res, next) {
-app.post('/users/upload', function (req, res, next) {
-  scratchRepo.insert(req.body, function(data) {
-    res.status(201).json({
-      "status": 201,
-      "statusText": "Created",
-      "message": "A new entry has added.",
-      "data": data
-    });
-  }, function(err) {
-    next(err);
-  });
-})
-*/
 //router.post('/upload', upload.single('file'), function (req, res) {
 app.post('/users', upload.single('file'), function (req, res) {
             const CSVToJSON = require('csvtojson');
@@ -105,17 +90,7 @@ app.post('/users', upload.single('file'), function (req, res) {
                     // log error if any
                     console.log(err);
                 });
-
-
-            //Path where image will be uploaded
-            //fstream = fs.createWriteStream(__dirname + '/img/' + filename);
-            //file.pipe(fstream);
-            //fstream.on('close', function () {    
-              //  console.log("Upload Finished of " + filename);              
-                //res.redirect('back');           //where to go next
-            });
-      //  });
-    //});
+              });
 
 // Configure router so all routes are prefixed with /users/v1
 app.use('/users', router);
