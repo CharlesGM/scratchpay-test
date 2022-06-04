@@ -2,6 +2,9 @@
 let express = require('express');
 let busboy = require('connect-busboy'); //middleware for form/file upload
 let app = express();
+let fs = require('fs');
+let multer = require('multer');
+let upload = multer({ dest: 'tmp/csv/' });
 let scratchRepo = require('./repos/scratchRepo');
 // Use the express Router object
 let router = express.Router();
@@ -69,8 +72,9 @@ router.get('/:id', function (req, res, next) {
   });
 });
 
-
-router.post('/', function (req, res, next) {
+/*
+//router.post('/users', function (req, res, next) {
+app.post('/users/upload', function (req, res, next) {
   scratchRepo.insert(req.body, function(data) {
     res.status(201).json({
       "status": 201,
@@ -82,23 +86,21 @@ router.post('/', function (req, res, next) {
     next(err);
   });
 })
-
-app.route('/upload')
-    .post(function (req, res, next) {
-
-        var fstream;
-        req.pipe(req.busboy);
-        req.busboy.on('file', function (fieldname, file, filename) {
-            console.log("Uploading: " + filename);
-
+*/
+//router.post('/upload', upload.single('file'), function (req, res) {
+app.post('/users', upload.single('file'), function (req, res) {
             const CSVToJSON = require('csvtojson');
             // convert users.csv file to JSON array
-            CSVToJSON().fromFile(file)
+            CSVToJSON().fromFile(req.file.path)
                 .then(users => {
-                  fs.writeFile('data.json', users, 'utf8', callback)
-                    // users is a JSON array
-                    // log the JSON array
-                    console.log(users);
+                  console.log(users);
+                    try {
+                      fs.writeFileSync('./assets/data.json', JSON.stringify(users));
+                      fs.unlinkSync(req.file.path);
+                      // file written successfully
+                    } catch (err) {
+                      console.error(err);
+                    }
                 }).catch(err => {
                     // log error if any
                     console.log(err);
@@ -112,11 +114,11 @@ app.route('/upload')
               //  console.log("Upload Finished of " + filename);              
                 //res.redirect('back');           //where to go next
             });
-        });
+      //  });
     //});
 
 // Configure router so all routes are prefixed with /users/v1
-app.use('/users/', router);
+app.use('/users', router);
 
 // Create server to listen on port 11000
 var server = app.listen(11000, function () {
